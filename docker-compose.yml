@@ -1,0 +1,48 @@
+version: '3'
+services:
+  mysqldb:
+    image: mysql:5.6
+    restart: always
+    ports: 
+      - 33306:3306
+    volumes:
+      - ./db/:/docker-entrypoint-initdb.d
+    environment:
+      MYSQL_DATABASE: test
+      MYSQL_ALLOW_EMPTY_PASSWORD: 'yes'
+      MYSQL_USER: root
+
+  persons:
+    image: localhost:5000/persons-api:latest
+    ports:
+      - 3001:3000
+    environment:
+      NODE_ENV: test
+      DATABASE_URL: mysql://root@mysqldb:3306/test
+    command: npm start
+    depends_on:
+      - mysqldb
+
+  api:
+    build: . 
+    ports:
+      - 3002:3000
+    environment:
+      DATABASE_URL: mysql://root@mysqldb:3306/test
+    command: npm start
+    depends_on:
+      - mysqldb
+      - persons
+
+  # users-api:
+  #   image: node:8.11.3-alpine
+  #   ports:
+  #     - 3000:3000
+  #   volumes:
+  #     - ./:/api/
+  #   depends_on:
+  #     - persons-api
+  #   command: bash -c "npm i && NODE_ENV=test PERSONS_API_URI=persons-api:3001 npm start"
+  #   networks: 
+  #     - api
+  

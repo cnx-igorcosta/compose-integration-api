@@ -1,0 +1,4 @@
+defaults:
+  personsApiUri: http://localhost:3001
+
+   
